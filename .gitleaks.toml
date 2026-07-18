@@ -8,6 +8,14 @@
 [extend]
 useDefault = true
 
+# Scope the allowlist to the exact local-only default strings, matched against
+# the whole line, rather than exempting docker-compose.yml wholesale — so a real
+# secret added to that file later is still caught.
 [allowlist]
-description = "Local/CI-only, non-secret Pact Broker + Postgres defaults live only in docker-compose.yml."
-paths = ['''docker-compose\.yml''']
+description = "Local/CI-only, non-secret Pact Broker + Postgres defaults."
+regexTarget = "line"
+regexes = [
+  '''postgres://pact_broker:pact_broker@pact-broker-db/pact_broker''',
+  '''PACT_BROKER_BASIC_AUTH_(USERNAME|PASSWORD): pact''',
+  '''POSTGRES_(USER|PASSWORD|DB): pact_broker''',
+]

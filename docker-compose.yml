@@ -27,7 +27,7 @@ services:
   # They are NOT secrets; docker-compose.yml is allowlisted in .gitleaks.toml
   # for exactly this reason and must never carry a real credential.
   pact-broker-db:
-    image: postgres:16-alpine
+    image: postgres:16.14-alpine
     profiles: ['pact']
     environment:
       POSTGRES_USER: pact_broker
@@ -40,7 +40,8 @@ services:
       retries: 10
 
   pact-broker:
-    image: pactfoundation/pact-broker:latest
+    # Pinned (not :latest) so the gate's verdict is reproducible across runs.
+    image: pactfoundation/pact-broker:2.140.0-pactbroker2.119.0
     profiles: ['pact']
     depends_on:
       pact-broker-db:
@@ -51,8 +52,10 @@ services:
       PACT_BROKER_DATABASE_URL: postgres://pact_broker:pact_broker@pact-broker-db/pact_broker
       PACT_BROKER_BASIC_AUTH_USERNAME: pact
       PACT_BROKER_BASIC_AUTH_PASSWORD: pact
-      # Wait for postgres to accept connections before the broker migrates it.
-      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: '10'
+      # Postgres' entrypoint briefly runs a bootstrap server during init, so
+      # pg_isready can report ready before the real server is up. Give the broker
+      # generous connect retries to ride out that window during migration.
+      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: '20'
 
   consumer:
     build:
