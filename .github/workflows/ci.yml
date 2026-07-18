@@ -38,6 +38,50 @@ jobs:
       - if: always()
         run: docker compose down
 
+  compatibility-gate:
+    name: compatibility gate (pact)
+    runs-on: ubuntu-latest
+    env:
+      PACT_BROKER_BASE_URL: http://localhost:9292
+      PACT_BROKER_USERNAME: pact
+      PACT_BROKER_PASSWORD: pact
+      GIT_COMMIT_SHA: ${{ github.sha }}
+      GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: start pact broker
+        run: docker compose --profile pact up -d pact-broker
+      - name: wait for broker heartbeat
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf -u "$PACT_BROKER_USERNAME:$PACT_BROKER_PASSWORD" \
+              http://localhost:9292/diagnostic/status/heartbeat; then
+              echo; echo "broker is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "broker did not become ready" >&2
+          docker compose --profile pact logs pact-broker pact-broker-db
+          exit 1
+      - name: consumer contract test (generate pact)
+        run: npm run test:pact
+      - name: publish contract to broker
+        run: npm run pact:publish
+      - name: provider verification (publishes results to broker)
+        run: npm run pact:verify
+      - name: can-i-deploy (the gate)
+        run: npm run pact:can-i-deploy
+      - name: dump broker logs on failure
+        if: failure()
+        run: docker compose --profile pact logs --no-color pact-broker pact-broker-db
+      - if: always()
+        run: docker compose --profile pact down
+
   secret-scan:
     name: secret scan (gitleaks)
     runs-on: ubuntu-latest
