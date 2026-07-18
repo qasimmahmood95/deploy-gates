@@ -32,6 +32,9 @@ jobs:
           curl -sf http://localhost:3000/health
           curl -sf http://localhost:3000/accounts/acc-001/overview | tee overview.json
           grep -q '"recentTransactions"' overview.json
+      - name: dump container logs on failure
+        if: failure()
+        run: docker compose logs --no-color
       - if: always()
         run: docker compose down
 
