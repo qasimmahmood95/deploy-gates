@@ -56,11 +56,11 @@ export const options = {
   // Keyed on the per-scenario `scenario` tag so the steady SLO and the spike
   // resilience bounds are judged independently.
   thresholds: {
-    // Steady load — the primary SLO, including response correctness.
+    // Steady load: the primary SLO, including response correctness.
     'http_req_failed{scenario:steady}': [`rate<${ERROR_RATE}`],
     'http_req_duration{scenario:steady}': [`p(95)<${P95_MS}`],
     'checks{scenario:steady}': ['rate==1.00'],
-    // Spike — the service must stay up under a burst, with looser bounds.
+    // Spike: the service must stay up under a burst, with looser bounds.
     'http_req_failed{scenario:spike}': [`rate<${SPIKE_ERROR_RATE}`],
     'http_req_duration{scenario:spike}': [`p(95)<${SPIKE_P95_MS}`],
   },
