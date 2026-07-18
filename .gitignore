@@ -3,3 +3,7 @@ dist/
 coverage/
 *.tsbuildinfo
 *.log
+
+# Pact contracts and logs are generated; the broker is the source of truth.
+pact/pacts/
+pact/logs/
