@@ -1,0 +1,35 @@
+{
+  "name": "deploy-gates",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Release gating showcase: Pact contract verification and k6 performance thresholds as one unified deploy gate",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "services/provider",
+    "services/consumer"
+  ],
+  "scripts": {
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@types/node": "^22.15.0",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.31.0",
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.5",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.36.0",
+    "vitest": "^3.2.4"
+  }
+}
