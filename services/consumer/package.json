@@ -4,5 +4,13 @@
   "private": true,
   "description": "Client service consuming the custody-facade provider",
   "license": "MIT",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "fastify": "^5.4.0"
+  }
 }
