@@ -15,9 +15,9 @@ verdicts that block.
 
 This repo proves it both ways with two permanently-red branches: a build that is
 functionally perfect but breaks the contract ([blocked by the Pact
-gate](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653264724)),
+gate](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653984087)),
 and a build that honors the contract but regresses latency ([blocked by the k6
-gate](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653266437)).
+gate](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653984200)).
 In both runs every other check is green, and the deploy is skipped.
 
 ## Architecture
@@ -123,7 +123,7 @@ Two long-lived branches each break exactly one gate. Neither will ever merge.
 | compatibility gate      | **red**: consumer's contract still expects `accountId`                                                                                                                | green (responses still contract-correct)                                                                                                                                |
 | performance gate        | green (latency unaffected)                                                                                                                                            | **red**: steady p95 breaches 250ms                                                                                                                                      |
 | deploy                  | **skipped**                                                                                                                                                           | **skipped**                                                                                                                                                             |
-| Red run                 | [actions/runs/29653264724](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653264724)                                                                   | [actions/runs/29653266437](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653266437)                                                                     |
+| Red run                 | [actions/runs/29653984087](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653984087)                                                                   | [actions/runs/29653984200](https://github.com/qasimmahmood95/deploy-gates/actions/runs/29653984200)                                                                     |
 
 The symmetry is the point: one build fails only the contract gate, the other
 fails only the performance gate, and either alone blocks the deploy. Unit tests
