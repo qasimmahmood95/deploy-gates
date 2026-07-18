@@ -148,16 +148,21 @@ jobs:
   deploy:
     name: deploy (gated on both gates)
     runs-on: ubuntu-latest
-    needs: [compatibility-gate, performance-gate]
+    # The two release gates are the headline dependency, but a real deploy also
+    # needs the rest of the board green — so a failing test or a leaked secret
+    # blocks it too. deploy runs on every green build (PRs included) on purpose,
+    # so a red gate visibly skips it here; a real pipeline would additionally
+    # guard this to `main` (see README).
+    needs: [checks, compose-smoke, compatibility-gate, performance-gate, secret-scan]
     steps:
       - name: deploy (fake)
         run: |
-          echo "Both gates passed — deploying ${GITHUB_SHA}."
+          echo "All gates green — deploy authorized for ${GITHUB_SHA}."
           mkdir -p artifact
-          echo "deployed ${GITHUB_SHA}" > artifact/deploy.txt
+          echo "deploy authorized for ${GITHUB_SHA}" > artifact/deploy.txt
       - uses: actions/upload-artifact@v4
         with:
           name: deploy-marker
           path: artifact/deploy.txt
       - name: record the deploy in the job summary
-        run: echo "## Deploy ran for \`${GITHUB_SHA}\` — both gates were green." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "## Deploy authorized for \`${GITHUB_SHA}\` — all gates green." >> "$GITHUB_STEP_SUMMARY"
