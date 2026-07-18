@@ -1,0 +1,41 @@
+services:
+  provider:
+    build:
+      context: .
+      dockerfile: services/provider/Dockerfile
+    ports:
+      - '3001:3001'
+    healthcheck:
+      # Use node (guaranteed present in a node image) rather than depending on a
+      # wget/curl binary that may not ship in node:22-alpine.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3001/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  consumer:
+    build:
+      context: .
+      dockerfile: services/consumer/Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      PROVIDER_BASE_URL: http://provider:3001
+    depends_on:
+      provider:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
