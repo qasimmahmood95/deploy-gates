@@ -1,0 +1,8 @@
+{
+  "name": "@deploy-gates/consumer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Client service consuming the custody-facade provider",
+  "license": "MIT",
+  "type": "module"
+}
