@@ -1,4 +1,4 @@
-/** Amounts are decimal strings, never floats — this is a custody-style API. */
+/** Amounts are decimal strings, never floats. This is a custody-style API. */
 export interface AssetBalance {
   asset: string;
   amount: string;

@@ -118,7 +118,7 @@ jobs:
   # --- The unified deploy gate ------------------------------------------------
   # gate-summary always runs and reports both gate verdicts side by side.
   # deploy only runs when BOTH gates succeed (default `needs` semantics), so a
-  # single red gate provably blocks the deploy.
+  # single red gate blocks the deploy.
   gate-summary:
     name: gate status summary
     runs-on: ubuntu-latest
@@ -129,7 +129,7 @@ jobs:
         run: |
           compat='${{ needs.compatibility-gate.result }}'
           perf='${{ needs.performance-gate.result }}'
-          verdict() { if [ "$1" = success ]; then echo '✅ pass'; else echo "❌ $1"; fi; }
+          verdict() { if [ "$1" = success ]; then echo 'pass'; else echo "$1"; fi; }
           {
             echo '## Deploy gates'
             echo
@@ -139,9 +139,9 @@ jobs:
             echo "| Performance (k6) | $(verdict "$perf") |"
             echo
             if [ "$compat" = success ] && [ "$perf" = success ]; then
-              echo '**Deploy allowed** — both gates are green.'
+              echo 'Deploy allowed: both gates are green.'
             else
-              echo '**Deploy blocked** — at least one gate is not green.'
+              echo 'Deploy blocked: at least one gate is not green.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -149,7 +149,7 @@ jobs:
     name: deploy (gated on both gates)
     runs-on: ubuntu-latest
     # The two release gates are the headline dependency, but a real deploy also
-    # needs the rest of the board green — so a failing test or a leaked secret
+    # needs the rest of the board green, so a failing test or a leaked secret
     # blocks it too. deploy runs on every green build (PRs included) on purpose,
     # so a red gate visibly skips it here; a real pipeline would additionally
     # guard this to `main` (see README).
@@ -157,7 +157,7 @@ jobs:
     steps:
       - name: deploy (fake)
         run: |
-          echo "All gates green — deploy authorized for ${GITHUB_SHA}."
+          echo "All gates green, deploy authorized for ${GITHUB_SHA}."
           mkdir -p artifact
           echo "deploy authorized for ${GITHUB_SHA}" > artifact/deploy.txt
       - uses: actions/upload-artifact@v4
@@ -165,4 +165,4 @@ jobs:
           name: deploy-marker
           path: artifact/deploy.txt
       - name: record the deploy in the job summary
-        run: echo "## Deploy authorized for \`${GITHUB_SHA}\` — all gates green." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "## Deploy authorized for \`${GITHUB_SHA}\` (all gates green)." >> "$GITHUB_STEP_SUMMARY"
