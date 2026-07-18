@@ -1,0 +1,8 @@
+{
+  "name": "@deploy-gates/provider",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Custody-facade provider API (fictional, read-only)",
+  "license": "MIT",
+  "type": "module"
+}
