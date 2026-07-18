@@ -20,9 +20,13 @@ export function buildApp({ providerClient }: AppOptions): FastifyInstance {
         return reply.status(404).send({ error: 'account not found' });
       }
 
+      // Degrade gracefully: a recent-transaction status that is missing (404 ->
+      // null) or that the provider can't serve right now (a thrown error) is
+      // omitted from the overview rather than failing the whole aggregate. We
+      // favour availability of the overview over completeness of this list.
       const statuses = await Promise.all(
         balances.recentTransactionIds.map((id) =>
-          providerClient.getTransactionStatus(id),
+          providerClient.getTransactionStatus(id).catch(() => null),
         ),
       );
 

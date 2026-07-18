@@ -70,4 +70,16 @@ describe('consumer app', () => {
     expect(res.statusCode).toBe(200);
     expect(res.json().recentTransactions).toEqual([statuses['tx-1001']]);
   });
+
+  it('degrades instead of 500ing when a status lookup fails', async () => {
+    const client = stubClient();
+    client.getTransactionStatus = async (id) => {
+      if (id === 'tx-1002') throw new Error('provider unavailable');
+      return statuses[id] ?? null;
+    };
+    const app = buildApp({ providerClient: client });
+    const res = await app.inject({ method: 'GET', url: '/accounts/acc-001/overview' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().recentTransactions).toEqual([statuses['tx-1001']]);
+  });
 });
