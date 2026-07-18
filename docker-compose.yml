@@ -1,0 +1,29 @@
+services:
+  provider:
+    build:
+      context: .
+      dockerfile: services/provider/Dockerfile
+    ports:
+      - '3001:3001'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3001/health']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  consumer:
+    build:
+      context: .
+      dockerfile: services/consumer/Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      PROVIDER_BASE_URL: http://provider:3001
+    depends_on:
+      provider:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health']
+      interval: 5s
+      timeout: 3s
+      retries: 5
