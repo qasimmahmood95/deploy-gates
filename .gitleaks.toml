@@ -1,0 +1,13 @@
+# gitleaks configuration for deploy-gates.
+#
+# The no-secrets invariant is enforced from M0. This repo genuinely has no
+# secrets: the only credential-shaped strings are the local/CI-only defaults for
+# the throwaway Pact Broker and its Postgres in docker-compose.yml. Those are
+# deliberately public and must never be replaced by real credentials.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Local/CI-only, non-secret Pact Broker + Postgres defaults live only in docker-compose.yml."
+paths = ['''docker-compose\.yml''']
