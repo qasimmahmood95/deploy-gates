@@ -18,7 +18,7 @@ in the same gating architecture.
 
 - [x] M0 — Scaffold (workspaces, lint/typecheck/test, secret scanning, CI skeleton)
 - [x] M1 — Services (provider + consumer)
-- [ ] M2 — Compatibility gate (Pact)
+- [x] M2 — Compatibility gate (Pact)
 - [ ] M3 — Performance gate (k6)
 - [ ] M4 — The unified deploy gate
 - [ ] M5 — Planted defects, ADRs, full README
@@ -40,6 +40,22 @@ To run the full stack (provider on :3001, consumer on :3000):
 docker compose up --build
 curl http://localhost:3000/accounts/acc-001/overview
 ```
+
+### Compatibility gate (Pact)
+
+The consumer's expectations of the provider are pinned as a Pact contract. The
+consumer test generates the contract; the provider verifies it satisfies it.
+
+```sh
+npm run test:pact     # consumer test -> generates the contract in pact/pacts/
+npm run pact:verify   # provider verifies it against the generated contract
+```
+
+In CI these run against a self-hosted **Pact Broker** (behind the `pact` compose
+profile): the contract is published, the provider verification result is
+published back, and `can-i-deploy` reads both to decide whether the pair is safe
+to release — that `can-i-deploy` check is the gate. Broker credentials in
+`docker-compose.yml` are local/CI-only defaults, not secrets.
 
 Secret scanning is enforced by [gitleaks](https://github.com/gitleaks/gitleaks) — as
 a pre-commit hook locally (install gitleaks to enable it) and as a required CI job.
