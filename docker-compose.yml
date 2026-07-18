@@ -18,6 +18,42 @@ services:
       retries: 5
       start_period: 5s
 
+  # --- Pact compatibility gate -------------------------------------------------
+  # Broker + its database live behind the `pact` profile so the default
+  # `docker compose up` (the M1 service smoke) does not start them. The pact gate
+  # brings them up explicitly with `docker compose --profile pact up`.
+  #
+  # All credentials below are local/CI-only defaults for a throwaway broker.
+  # They are NOT secrets; docker-compose.yml is allowlisted in .gitleaks.toml
+  # for exactly this reason and must never carry a real credential.
+  pact-broker-db:
+    image: postgres:16-alpine
+    profiles: ['pact']
+    environment:
+      POSTGRES_USER: pact_broker
+      POSTGRES_PASSWORD: pact_broker
+      POSTGRES_DB: pact_broker
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pact_broker -d pact_broker']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  pact-broker:
+    image: pactfoundation/pact-broker:latest
+    profiles: ['pact']
+    depends_on:
+      pact-broker-db:
+        condition: service_healthy
+    ports:
+      - '9292:9292'
+    environment:
+      PACT_BROKER_DATABASE_URL: postgres://pact_broker:pact_broker@pact-broker-db/pact_broker
+      PACT_BROKER_BASIC_AUTH_USERNAME: pact
+      PACT_BROKER_BASIC_AUTH_PASSWORD: pact
+      # Wait for postgres to accept connections before the broker migrates it.
+      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: '10'
+
   consumer:
     build:
       context: .
