@@ -7,7 +7,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    // k6 scripts run in the k6 (goja) runtime, not Node — declare its globals.
+    // k6 scripts run in the k6 (goja) runtime, not Node; declare its globals.
     files: ['k6/**/*.js'],
     languageOptions: {
       globals: { __ENV: 'readonly', __VU: 'readonly', __ITER: 'readonly' },

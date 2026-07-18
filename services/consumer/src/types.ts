@@ -1,4 +1,4 @@
-// The consumer defines its own view of the provider's responses — this is the
+// The consumer defines its own view of the provider's responses. This is the
 // contract surface that Pact will formalize in M2.
 export interface AssetBalance {
   asset: string;
