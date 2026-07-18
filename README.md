@@ -19,7 +19,7 @@ in the same gating architecture.
 - [x] M0 — Scaffold (workspaces, lint/typecheck/test, secret scanning, CI skeleton)
 - [x] M1 — Services (provider + consumer)
 - [x] M2 — Compatibility gate (Pact)
-- [ ] M3 — Performance gate (k6)
+- [x] M3 — Performance gate (k6)
 - [ ] M4 — The unified deploy gate
 - [ ] M5 — Planted defects, ADRs, full README
 
@@ -56,6 +56,21 @@ profile): the contract is published, the provider verification result is
 published back, and `can-i-deploy` reads both to decide whether the pair is safe
 to release — that `can-i-deploy` check is the gate. Broker credentials in
 `docker-compose.yml` are local/CI-only defaults, not secrets.
+
+### Performance gate (k6)
+
+Two [k6](https://k6.io) scenarios run against the provider — a steady ramping load
+and a spike — with thresholds on p95 latency and error rate. A breach makes k6 exit
+non-zero, which fails CI: the thresholds _are_ the gate.
+
+```sh
+k6 run k6/load.js                 # against a locally running provider on :3001
+P95_MS=1 k6 run k6/load.js        # tighten the p95 threshold to force a red run
+```
+
+Thresholds and target are overridable via env (`BASE_URL`, `P95_MS`, `ERROR_RATE`),
+so the gate can be re-pointed or deliberately tightened. M5 adds a committed red run
+via the `defect/perf-regression` branch.
 
 Secret scanning is enforced by [gitleaks](https://github.com/gitleaks/gitleaks) — as
 a pre-commit hook locally (install gitleaks to enable it) and as a required CI job.
