@@ -26,10 +26,19 @@ const stateHandlers = {
 
 async function main(): Promise<void> {
   const app = buildApp();
-  // Ephemeral port avoids clashing with a locally running provider.
-  await app.listen({ port: 0, host: '127.0.0.1' });
-  const { port } = app.server.address() as AddressInfo;
+  try {
+    // Ephemeral port avoids clashing with a locally running provider.
+    await app.listen({ port: 0, host: '127.0.0.1' });
+    const { port } = app.server.address() as AddressInfo;
+    const options = buildVerifierOptions(port);
+    const output = await new Verifier(options).verifyProvider();
+    console.log('Pact verification complete:\n', output);
+  } finally {
+    await app.close();
+  }
+}
 
+function buildVerifierOptions(port: number): VerifierOptions {
   const base: VerifierOptions = {
     provider: 'provider',
     providerBaseUrl: `http://127.0.0.1:${port}`,
@@ -40,14 +49,14 @@ async function main(): Promise<void> {
   const brokerUrl = process.env.PACT_BROKER_BASE_URL;
   const branch = process.env.GIT_BRANCH;
 
-  let options: VerifierOptions;
   if (brokerUrl) {
     // Broker mode (CI): pull the contract from the broker and publish the
     // pass/fail back so can-i-deploy can read it.
-    options = {
+    return {
       ...base,
       pactBrokerUrl: brokerUrl,
-      publishVerificationResult: process.env.CI === 'true',
+      // In broker mode we always publish the result; can-i-deploy reads it next.
+      publishVerificationResult: true,
       providerVersion: process.env.GIT_COMMIT_SHA ?? 'dev',
       // Verify the consumer contract published from this same branch so a PR
       // verifies its own contract, not main's.
@@ -60,17 +69,10 @@ async function main(): Promise<void> {
         : {}),
       ...(branch ? { providerVersionBranch: branch } : {}),
     };
-  } else {
-    // Local mode: verify the contract the consumer test just generated.
-    options = { ...base, pactUrls: [resolve(here, '../pacts/consumer-provider.json')] };
   }
 
-  try {
-    const output = await new Verifier(options).verifyProvider();
-    console.log('Pact verification complete:\n', output);
-  } finally {
-    await app.close();
-  }
+  // Local mode: verify the contract the consumer test just generated.
+  return { ...base, pactUrls: [resolve(here, '../pacts/consumer-provider.json')] };
 }
 
 main().catch((err) => {

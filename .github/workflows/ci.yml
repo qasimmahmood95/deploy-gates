@@ -45,7 +45,10 @@ jobs:
       PACT_BROKER_BASE_URL: http://localhost:9292
       PACT_BROKER_USERNAME: pact
       PACT_BROKER_PASSWORD: pact
-      GIT_COMMIT_SHA: ${{ github.sha }}
+      # On pull_request, github.sha is the ephemeral merge commit; record pact
+      # versions against the real head commit so broker versions map to a commit
+      # that actually gets deployed.
+      GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4

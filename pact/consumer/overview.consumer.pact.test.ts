@@ -81,7 +81,7 @@ describe('consumer -> provider contract', () => {
         b.headers({ 'Content-Type': 'application/json' });
         b.jsonBody({
           transactionId: string('tx-1002'),
-          status: regex('pending|confirmed|failed', 'pending'),
+          status: regex('^(pending|confirmed|failed)$', 'pending'),
           updatedAt: isoTimestamp('2026-06-30T18:30:00.000Z'),
         });
       })
