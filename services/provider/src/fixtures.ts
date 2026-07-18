@@ -4,7 +4,7 @@ import type { AccountBalances, TransactionStatus } from './types.js';
 // payloads become contract examples (M2).
 export const accounts: Record<string, AccountBalances> = {
   'acc-001': {
-    accountId: 'acc-001',
+    id: 'acc-001',
     asOf: '2026-07-01T00:00:00.000Z',
     balances: [
       { asset: 'BTC', amount: '1.25000000' },
@@ -14,7 +14,7 @@ export const accounts: Record<string, AccountBalances> = {
     recentTransactionIds: ['tx-1001', 'tx-1002'],
   },
   'acc-002': {
-    accountId: 'acc-002',
+    id: 'acc-002',
     asOf: '2026-07-01T00:00:00.000Z',
     balances: [{ asset: 'BTC', amount: '0.05000000' }],
     recentTransactionIds: ['tx-1003'],
