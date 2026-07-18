@@ -5,7 +5,7 @@ import { health } from './health.js';
 
 // DEFECT (defect/perf-regression): simulates a slow downstream dependency
 // (e.g. an unindexed lookup or a chatty upstream call) added to the data
-// endpoints. Functionally everything still works — unit tests, contract
+// endpoints. Functionally everything still works: unit tests, contract
 // verification, and the compose smoke all stay green. Only the k6 SLO
 // thresholds (steady p95 < 250ms) catch it, turning the performance gate red.
 const ARTIFICIAL_LATENCY_MS = 350;
