@@ -14,7 +14,7 @@ describe('provider app', () => {
     const res = await app.inject({ method: 'GET', url: '/balances/acc-001' });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.accountId).toBe('acc-001');
+    expect(body.id).toBe('acc-001');
     expect(body.balances).toContainEqual({ asset: 'BTC', amount: '1.25000000' });
     expect(body.recentTransactionIds).toEqual(['tx-1001', 'tx-1002']);
   });

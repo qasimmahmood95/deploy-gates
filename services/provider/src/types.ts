@@ -5,7 +5,11 @@ export interface AssetBalance {
 }
 
 export interface AccountBalances {
-  accountId: string;
+  // DEFECT (defect/contract-break): renamed from `accountId` to `id`. The
+  // provider and its own tests stay internally consistent, but this silently
+  // breaks the consumer's published Pact contract, which only the
+  // compatibility gate catches.
+  id: string;
   asOf: string;
   balances: AssetBalance[];
   recentTransactionIds: string[];
