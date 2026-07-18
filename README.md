@@ -20,7 +20,7 @@ in the same gating architecture.
 - [x] M1 — Services (provider + consumer)
 - [x] M2 — Compatibility gate (Pact)
 - [x] M3 — Performance gate (k6)
-- [ ] M4 — The unified deploy gate
+- [x] M4 — The unified deploy gate
 - [ ] M5 — Planted defects, ADRs, full README
 
 ## Development
@@ -76,6 +76,36 @@ the `defect/perf-regression` branch.
 
 Secret scanning is enforced by [gitleaks](https://github.com/gitleaks/gitleaks) — as
 a pre-commit hook locally (install gitleaks to enable it) and as a required CI job.
+
+## The unified deploy gate
+
+Both gates are just CI jobs, so the deploy is expressed as a job that **depends on
+both**:
+
+```yaml
+deploy:
+  needs: [compatibility-gate, performance-gate]
+```
+
+With GitHub Actions' default `needs` semantics, `deploy` runs only when _both_ gate
+jobs succeed. If either the compatibility gate or the performance gate is red, the
+`deploy` job never runs — the gate is genuinely blocking, not decorative. A separate
+`gate status summary` job runs `if: always()` and writes both verdicts side by side to
+the run's job summary, so a red run shows exactly which gate blocked the deploy.
+
+### Branch protection
+
+To make the gates enforce on `main`, mark them as **required status checks** in the
+repository's branch-protection rule (Settings → Branches → branch protection for
+`main`):
+
+- `compatibility gate (pact)`
+- `performance gate (k6)`
+- `lint / typecheck / test`
+- `secret scan (gitleaks)`
+
+With these required, a PR cannot merge unless every gate is green, and the `deploy`
+job cannot run for a build that hasn't passed both gates.
 
 ## License
 
