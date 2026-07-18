@@ -22,6 +22,7 @@
     "pact:verify": "tsx pact/provider/verify.ts",
     "pact:publish": "pact-broker publish pact/pacts --broker-base-url $PACT_BROKER_BASE_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD --consumer-app-version $GIT_COMMIT_SHA --branch $GIT_BRANCH",
     "pact:can-i-deploy": "pact-broker can-i-deploy --broker-base-url $PACT_BROKER_BASE_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD --pacticipant consumer --version $GIT_COMMIT_SHA --pacticipant provider --version $GIT_COMMIT_SHA",
+    "perf": "k6 run k6/load.js",
     "prepare": "husky || true"
   },
   "devDependencies": {
