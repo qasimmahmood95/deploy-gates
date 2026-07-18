@@ -68,9 +68,11 @@ k6 run k6/load.js                 # against a locally running provider on :3001
 P95_MS=1 k6 run k6/load.js        # tighten the p95 threshold to force a red run
 ```
 
-Thresholds and target are overridable via env (`BASE_URL`, `P95_MS`, `ERROR_RATE`),
-so the gate can be re-pointed or deliberately tightened. M5 adds a committed red run
-via the `defect/perf-regression` branch.
+The steady scenario carries the primary SLO; the spike is a looser resilience check
+(`SPIKE_P95_MS`, `SPIKE_ERROR_RATE`) so burst noise can't flake it. All thresholds and
+the target are overridable via env (`BASE_URL`, `P95_MS`, `ERROR_RATE`, `SPIKE_*`), so
+the gate can be re-pointed or deliberately tightened. M5 adds a committed red run via
+the `defect/perf-regression` branch.
 
 Secret scanning is enforced by [gitleaks](https://github.com/gitleaks/gitleaks) — as
 a pre-commit hook locally (install gitleaks to enable it) and as a required CI job.

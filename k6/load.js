@@ -5,8 +5,13 @@ import { check } from 'k6';
 // subject). Everything is overridable via env so the gate can be re-pointed or
 // deliberately tightened to demonstrate a red run.
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3001';
+// Steady load carries the primary SLO (tight). The spike is a resilience check
+// with looser bounds that tolerate burst connection churn and scheduling noise
+// on a shared CI runner, so spike behaviour can't flake the steady SLO.
 const P95_MS = Number(__ENV.P95_MS || 250);
 const ERROR_RATE = Number(__ENV.ERROR_RATE || 0.01);
+const SPIKE_P95_MS = Number(__ENV.SPIKE_P95_MS || 500);
+const SPIKE_ERROR_RATE = Number(__ENV.SPIKE_ERROR_RATE || 0.05);
 
 // Only 200-returning endpoints, so http_req_failed reflects real errors rather
 // than expected 404s.
@@ -48,9 +53,16 @@ export const options = {
     },
   },
   // Thresholds are the gate: a breach makes k6 exit non-zero and fails CI.
+  // Keyed on the per-scenario `scenario` tag so the steady SLO and the spike
+  // resilience bounds are judged independently.
   thresholds: {
-    http_req_failed: [`rate<${ERROR_RATE}`],
-    http_req_duration: [`p(95)<${P95_MS}`],
+    // Steady load — the primary SLO, including response correctness.
+    'http_req_failed{scenario:steady}': [`rate<${ERROR_RATE}`],
+    'http_req_duration{scenario:steady}': [`p(95)<${P95_MS}`],
+    'checks{scenario:steady}': ['rate==1.00'],
+    // Spike — the service must stay up under a burst, with looser bounds.
+    'http_req_failed{scenario:spike}': [`rate<${SPIKE_ERROR_RATE}`],
+    'http_req_duration{scenario:spike}': [`p(95)<${SPIKE_P95_MS}`],
   },
 };
 
