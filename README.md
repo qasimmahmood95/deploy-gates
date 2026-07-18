@@ -17,7 +17,7 @@ in the same gating architecture.
 ## Status
 
 - [x] M0 — Scaffold (workspaces, lint/typecheck/test, secret scanning, CI skeleton)
-- [ ] M1 — Services (provider + consumer)
+- [x] M1 — Services (provider + consumer)
 - [ ] M2 — Compatibility gate (Pact)
 - [ ] M3 — Performance gate (k6)
 - [ ] M4 — The unified deploy gate
@@ -32,6 +32,13 @@ npm ci
 npm run lint
 npm run typecheck
 npm run test
+```
+
+To run the full stack (provider on :3001, consumer on :3000):
+
+```sh
+docker compose up --build
+curl http://localhost:3000/accounts/acc-001/overview
 ```
 
 Secret scanning is enforced by [gitleaks](https://github.com/gitleaks/gitleaks) — as

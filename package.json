@@ -13,11 +13,12 @@
     "services/consumer"
   ],
   "scripts": {
+    "build": "npm run build --workspaces",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
@@ -28,6 +29,7 @@
     "eslint-config-prettier": "^10.1.5",
     "husky": "^9.1.7",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.36.0",
     "vitest": "^3.2.4"
